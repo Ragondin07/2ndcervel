@@ -19,6 +19,8 @@ class DatabaseSeeder extends Seeder
             ],
         );
 
-        $this->call(MvpDemoSeeder::class);
+        if (filter_var(env('SEED_DEMO_DATA', false), FILTER_VALIDATE_BOOL)) {
+            $this->call(MvpDemoSeeder::class);
+        }
     }
 }

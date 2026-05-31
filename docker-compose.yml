@@ -8,21 +8,6 @@ services:
       - .env
     ports:
       - "${APP_PORT:-8000}:8000"
-    environment:
-      APP_ENV: ${APP_ENV:-local}
-      APP_DEBUG: ${APP_DEBUG:-true}
-      DB_CONNECTION: ${DB_CONNECTION:-pgsql}
-      DB_HOST: ${DB_HOST:-postgres}
-      DB_PORT: ${DB_PORT:-5432}
-      DB_DATABASE: ${DB_DATABASE:-second_cervel}
-      DB_USERNAME: ${DB_USERNAME:-second_cervel}
-      DB_PASSWORD: ${DB_PASSWORD:-second_cervel}
-      QUEUE_CONNECTION: ${QUEUE_CONNECTION:-database}
-      FILESYSTEM_DISK: ${FILESYSTEM_DISK:-local}
-      MEILISEARCH_HOST: ${MEILISEARCH_HOST:-http://meilisearch:7700}
-      MEILISEARCH_KEY: ${MEILISEARCH_KEY:-local_master_key}
-      TIKA_URL: ${TIKA_URL:-http://tika:9998}
-      SCOUT_DRIVER: ${SCOUT_DRIVER:-meilisearch}
     volumes:
       - ./:/var/www/html
       - app_vendor:/var/www/html/vendor
@@ -43,21 +28,6 @@ services:
     command: ["php", "artisan", "queue:work", "database", "--queue=indexing,default", "--sleep=2", "--tries=3"]
     env_file:
       - .env
-    environment:
-      APP_ENV: ${APP_ENV:-local}
-      APP_DEBUG: ${APP_DEBUG:-true}
-      DB_CONNECTION: ${DB_CONNECTION:-pgsql}
-      DB_HOST: ${DB_HOST:-postgres}
-      DB_PORT: ${DB_PORT:-5432}
-      DB_DATABASE: ${DB_DATABASE:-second_cervel}
-      DB_USERNAME: ${DB_USERNAME:-second_cervel}
-      DB_PASSWORD: ${DB_PASSWORD:-second_cervel}
-      QUEUE_CONNECTION: ${QUEUE_CONNECTION:-database}
-      FILESYSTEM_DISK: ${FILESYSTEM_DISK:-local}
-      MEILISEARCH_HOST: ${MEILISEARCH_HOST:-http://meilisearch:7700}
-      MEILISEARCH_KEY: ${MEILISEARCH_KEY:-local_master_key}
-      TIKA_URL: ${TIKA_URL:-http://tika:9998}
-      SCOUT_DRIVER: ${SCOUT_DRIVER:-meilisearch}
     volumes:
       - ./:/var/www/html
       - app_vendor:/var/www/html/vendor
