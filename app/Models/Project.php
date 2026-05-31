@@ -63,6 +63,7 @@ class Project extends Model
             'summary' => $this->summary,
             'description' => $this->description,
             'status' => $this->status,
+            'archived_at' => $this->archived_at?->toISOString(),
             'priority' => $this->priority,
             'category' => $this->category,
             'updated_at' => $this->updated_at?->toISOString(),

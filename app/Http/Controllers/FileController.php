@@ -28,6 +28,7 @@ class FileController extends Controller
         return view('files.index', [
             'files' => StoredFile::query()
                 ->with(['project', 'note'])
+                ->whereNull('archived_at')
                 ->latest('updated_at')
                 ->get(),
         ]);

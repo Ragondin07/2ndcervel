@@ -17,24 +17,24 @@ return [
         'key' => env('MEILISEARCH_KEY'),
         'index-settings' => [
             App\Models\Project::class => [
-                'filterableAttributes' => ['type', 'project_id', 'status', 'updated_at_timestamp'],
+                'filterableAttributes' => ['type', 'project_id', 'status', 'archived_at', 'updated_at_timestamp'],
                 'sortableAttributes' => ['updated_at_timestamp'],
             ],
             App\Models\Note::class => [
-                'filterableAttributes' => ['type', 'project_id', 'status', 'updated_at_timestamp'],
+                'filterableAttributes' => ['type', 'project_id', 'status', 'archived_at', 'updated_at_timestamp'],
                 'sortableAttributes' => ['updated_at_timestamp'],
             ],
             App\Models\Decision::class => [
-                'filterableAttributes' => ['type', 'project_id', 'status', 'updated_at_timestamp'],
+                'filterableAttributes' => ['type', 'project_id', 'status', 'archived_at', 'updated_at_timestamp'],
                 'sortableAttributes' => ['updated_at_timestamp'],
             ],
             App\Models\Action::class => [
-                'filterableAttributes' => ['type', 'project_id', 'status', 'updated_at_timestamp'],
+                'filterableAttributes' => ['type', 'project_id', 'status', 'archived_at', 'updated_at_timestamp'],
                 'sortableAttributes' => ['updated_at_timestamp'],
             ],
             App\Models\File::class => [
                 'searchableAttributes' => ['title', 'original_name', 'stored_name', 'path', 'description', 'extracted_text', 'ocr_text'],
-                'filterableAttributes' => ['type', 'project_id', 'status', 'updated_at_timestamp'],
+                'filterableAttributes' => ['type', 'project_id', 'status', 'archived_at', 'updated_at_timestamp'],
                 'sortableAttributes' => ['updated_at_timestamp'],
             ],
         ],

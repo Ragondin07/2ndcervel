@@ -13,6 +13,7 @@ class ActionController extends Controller
         return view('actions.index', [
             'actions' => Action::query()
                 ->with('project')
+                ->whereNull('archived_at')
                 ->latest('updated_at')
                 ->get(),
             'statuses' => MvpOptions::ACTION_STATUSES,
