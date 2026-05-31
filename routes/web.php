@@ -23,6 +23,7 @@ Route::middleware('guest')->group(function (): void {
 
 Route::middleware('auth')->group(function (): void {
     Route::get('/dashboard', DashboardController::class)->name('dashboard');
+    Route::post('/pin/{type}/{id}', PinController::class)->whereNumber('id')->name('pin.toggle');
     Route::resource('projects', ProjectController::class);
     Route::patch('/projects/{project}/archive', [ProjectController::class, 'archive'])->name('projects.archive');
     Route::resource('notes', NoteController::class);
