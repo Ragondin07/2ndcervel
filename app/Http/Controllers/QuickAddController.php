@@ -38,8 +38,10 @@ class QuickAddController extends Controller
 
     private function storeNote(QuickAddRequest $request, array $data): RedirectResponse
     {
+        $projectId = $data['project_id'] ?? null;
+
         $note = Note::query()->create([
-            'project_id' => $data['project_id'],
+            'project_id' => $projectId,
             'title' => $data['title'],
             'content' => $data['content'],
             'type' => 'note_brute',
@@ -56,8 +58,10 @@ class QuickAddController extends Controller
 
     private function storeDecision(QuickAddRequest $request, array $data): RedirectResponse
     {
+        $projectId = $data['project_id'] ?? null;
+
         $decision = Decision::query()->create([
-            'project_id' => $data['project_id'],
+            'project_id' => $projectId,
             'title' => $data['title'],
             'decision' => $data['content'],
             'status' => $data['status'],
@@ -71,8 +75,10 @@ class QuickAddController extends Controller
 
     private function storeAction(QuickAddRequest $request, array $data): RedirectResponse
     {
+        $projectId = $data['project_id'] ?? null;
+
         $action = Action::query()->create([
-            'project_id' => $data['project_id'],
+            'project_id' => $projectId,
             'title' => $data['title'],
             'description' => $data['content'],
             'status' => $data['status'],

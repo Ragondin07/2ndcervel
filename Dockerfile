@@ -31,14 +31,15 @@ RUN apk add --no-cache \
 
 COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
 
-COPY composer.json ./
-RUN composer install --no-interaction --prefer-dist --no-scripts
+COPY composer.* ./
+RUN composer install --no-interaction --prefer-dist --no-scripts --no-progress
 
 COPY . .
 COPY docker/app/entrypoint.sh /usr/local/bin/app-entrypoint
 
 RUN chmod +x /usr/local/bin/app-entrypoint \
-    && mkdir -p storage/app/uploads storage/framework/cache/data storage/framework/sessions storage/framework/views storage/logs bootstrap/cache
+    && mkdir -p storage/app/uploads storage/app/private storage/framework/cache/data storage/framework/sessions storage/framework/views storage/logs bootstrap/cache \
+    && chmod -R ug+rwX storage bootstrap/cache
 
 EXPOSE 8000
 

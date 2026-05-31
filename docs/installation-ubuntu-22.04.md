@@ -220,11 +220,11 @@ docker compose logs -f worker
 
 ## G. Initialisation Laravel
 
-Le conteneur `app` installe Composer si `vendor` est absent et genere `APP_KEY` si elle est vide. Vous pouvez verifier manuellement :
+Le conteneur `app` installe Composer si `vendor` est absent. Il utilise `composer.lock` des qu il existe, et genere `APP_KEY` une seule fois uniquement si elle est vide. Vous pouvez verifier manuellement :
 
 ```bash
-docker compose exec app composer install --no-interaction --prefer-dist
-docker compose exec app php artisan key:generate --force
+docker compose exec app composer install --no-interaction --prefer-dist --no-progress
+docker compose exec app sh -lc "sed -n 's/^APP_KEY=.*/APP_KEY=***/p' .env"
 ```
 
 Lancez les migrations :
@@ -265,7 +265,7 @@ Le script d'entree Docker cree ces dossiers et applique des droits de base. Si u
 
 ```bash
 docker compose exec app sh -lc "mkdir -p storage/app/uploads storage/framework/cache/data storage/framework/sessions storage/framework/views storage/logs bootstrap/cache"
-docker compose exec app sh -lc "chmod -R ug+rw storage bootstrap/cache"
+docker compose exec app sh -lc "mkdir -p storage/app/uploads storage/app/private storage/framework/cache/data storage/framework/sessions storage/framework/views storage/logs bootstrap/cache && chmod -R ug+rwX storage bootstrap/cache"
 ```
 
 Comme les fichiers sont dans un volume Docker, evitez de modifier directement les droits depuis l'hote sauf si vous savez quel utilisateur execute le conteneur.
@@ -674,10 +674,13 @@ Symptome : erreur Laravel sur la cle d'application.
 Correction :
 
 ```bash
-docker compose exec app php artisan key:generate --force
+# Si APP_KEY est vide uniquement :
+docker compose exec app php artisan key:generate --force --no-interaction
 docker compose exec app php artisan config:clear
-docker compose restart app
+docker compose restart app worker
 ```
+
+Si `APP_KEY` contient plusieurs occurrences de `base64:`, restaurez la valeur saine depuis une sauvegarde de `.env`. Ne regenerez pas une nouvelle cle si des cookies, sessions ou donnees chiffrees doivent rester lisibles.
 
 ### Permissions storage incorrectes
 
@@ -686,7 +689,7 @@ Symptomes : erreurs d'ecriture dans `storage`, sessions impossibles, logs imposs
 Correction :
 
 ```bash
-docker compose exec app sh -lc "chmod -R ug+rw storage bootstrap/cache"
+docker compose exec app sh -lc "mkdir -p storage/app/uploads storage/app/private storage/framework/cache/data storage/framework/sessions storage/framework/views storage/logs bootstrap/cache && chmod -R ug+rwX storage bootstrap/cache"
 docker compose restart app worker
 ```
 

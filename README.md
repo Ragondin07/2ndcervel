@@ -61,9 +61,9 @@ nano .env
 docker compose pull
 docker compose build
 docker compose up -d
-docker compose exec app php artisan key:generate --force
 docker compose exec app php artisan migrate
 docker compose exec app php artisan db:seed
+# Donnees de demonstration optionnelles : SEED_DEMO_DATA=true docker compose exec app php artisan db:seed
 docker compose exec app php artisan config:cache
 docker compose exec app php artisan route:cache
 docker compose exec app php artisan view:cache
@@ -76,8 +76,9 @@ Au premier demarrage, le conteneur `app` :
 
 1. copie `.env.example` vers `.env` si necessaire ;
 2. installe les dependances Composer si `vendor` est absent ;
-3. genere `APP_KEY` si elle est vide ;
-4. lance Laravel sur `0.0.0.0:8000`.
+3. genere `APP_KEY` une seule fois uniquement si elle est vide ;
+4. refuse de demarrer si `APP_KEY` est corrompue, au lieu de reecrire `.env` ;
+5. lance Laravel sur `0.0.0.0:8000`.
 
 ## Migration
 
@@ -91,12 +92,13 @@ Creer l'utilisateur administrateur initial :
 
 ```bash
 docker compose exec app php artisan db:seed
+# Donnees de demonstration optionnelles : SEED_DEMO_DATA=true docker compose exec app php artisan db:seed
 ```
 
-En developpement, pour repartir d'une base propre avec les donnees de test MVP :
+En developpement uniquement, pour repartir d'une base propre avec les donnees de test MVP, sauvegardez d abord PostgreSQL et les uploads puis activez explicitement `SEED_DEMO_DATA=true`. Ne lancez jamais `migrate:fresh` sur une base a conserver :
 
 ```bash
-docker compose exec app php artisan migrate:fresh --seed
+SEED_DEMO_DATA=true docker compose exec app php artisan migrate:fresh --seed
 ```
 
 Synchroniser les reglages Meilisearch puis reconstruire les index de recherche :
