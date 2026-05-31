@@ -6,19 +6,28 @@ RUN apk add --no-cache \
         bash \
         curl \
         git \
+        icu-libs \
+        libpq \
+        libzip \
+        oniguruma \
+        sqlite-libs \
+        unzip \
+        zip \
+    && apk add --no-cache --virtual .build-deps \
+        $PHPIZE_DEPS \
         icu-dev \
         libzip-dev \
         oniguruma-dev \
         postgresql-dev \
-        unzip \
-        zip \
+        sqlite-dev \
     && docker-php-ext-install \
         intl \
         mbstring \
         pdo \
         pdo_pgsql \
         pdo_sqlite \
-        zip
+        zip \
+    && apk del .build-deps
 
 COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
 
