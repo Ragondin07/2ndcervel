@@ -118,7 +118,7 @@ class MvpDemoSeeder extends Seeder
                 'extracted_text' => 'Exemple de contenu extrait pour les futurs tests de recherche.',
                 'indexing_status' => 'en_attente',
                 'extraction_status' => 'en_attente',
-                'ocr_status' => 'non_traite',
+                'ocr_status' => 'non_supporte',
             ],
         );
 

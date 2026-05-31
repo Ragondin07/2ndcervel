@@ -33,6 +33,7 @@ return [
                 'sortableAttributes' => ['updated_at_timestamp'],
             ],
             App\Models\File::class => [
+                'searchableAttributes' => ['title', 'original_name', 'stored_name', 'path', 'description', 'extracted_text', 'ocr_text'],
                 'filterableAttributes' => ['type', 'project_id', 'status', 'updated_at_timestamp'],
                 'sortableAttributes' => ['updated_at_timestamp'],
             ],

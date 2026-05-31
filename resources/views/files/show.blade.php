@@ -15,6 +15,10 @@
                     @csrf
                     <button type="submit">Relancer l'indexation</button>
                 </form>
+                <form method="POST" action="{{ route('files.ocr', $file) }}">
+                    @csrf
+                    <button type="submit">Relancer l'OCR</button>
+                </form>
                 <form method="POST" action="{{ route('files.destroy', $file) }}" onsubmit="return confirm('Supprimer ce fichier ?');">
                     @csrf
                     @method('DELETE')
@@ -67,6 +71,15 @@
             </section>
         @endif
 
+        @if ($file->ocr_error)
+            <section class="panel">
+                <div class="panel-inner">
+                    <h2 class="panel-title">Erreur OCR</h2>
+                    <p class="error">{{ $file->ocr_error }}</p>
+                </div>
+            </section>
+        @endif
+
         <section class="grid two">
             <div class="panel">
                 <div class="panel-inner">
@@ -93,6 +106,13 @@
             <div class="panel-inner">
                 <h2 class="panel-title">Texte extrait</h2>
                 <div class="description-block">{{ $file->extracted_text ?: 'Aucun texte extrait pour le moment.' }}</div>
+            </div>
+        </section>
+
+        <section class="panel">
+            <div class="panel-inner">
+                <h2 class="panel-title">Texte OCR</h2>
+                <div class="description-block">{{ $file->ocr_text ?: 'Aucun texte OCR pour le moment.' }}</div>
             </div>
         </section>
     </div>

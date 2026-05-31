@@ -83,6 +83,14 @@ class MvpOptions
         'non_traite',
     ];
 
+    public const FILE_OCR_STATUSES = [
+        'en_attente',
+        'en_cours',
+        'termine',
+        'erreur',
+        'non_supporte',
+    ];
+
     public const ALLOWED_FILE_EXTENSIONS = [
         'pdf',
         'jpg',
