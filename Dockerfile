@@ -36,8 +36,13 @@ RUN apk add --no-cache \
 
 COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
 
-COPY composer.* ./
-RUN composer install --no-interaction --prefer-dist --no-scripts --no-progress
+COPY composer.json composer.lock* ./
+RUN if [ -f composer.lock ]; then \
+        composer install --no-interaction --prefer-dist --no-scripts --no-progress; \
+    else \
+        echo "ERROR: composer.lock is missing. Run composer update in a networked environment and commit composer.lock." >&2; \
+        exit 1; \
+    fi
 
 COPY . .
 COPY docker/app/entrypoint.sh /usr/local/bin/app-entrypoint

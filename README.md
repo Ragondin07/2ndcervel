@@ -26,6 +26,22 @@ Volumes Docker :
 - `meilisearch_data` : donnees Meilisearch
 - `app_vendor` : dependances Composer installees dans le conteneur
 
+
+## Exploitation automatisée
+
+Les opérations courantes sont regroupées dans des scripts Bash à la racine :
+
+```bash
+./admin.sh            # console unique
+./update.sh           # mise à jour sûre sans suppression de données
+./healthcheck.sh      # diagnostic système
+./logs.sh             # consultation guidée des logs
+./fix-permissions.sh  # réparation des permissions Laravel
+./dev-reset.sh        # reset complet de développement uniquement
+```
+
+La procédure détaillée de déploiement, rollback, restauration et diagnostic est documentée dans `docs/operations.md`.
+
 ## Installation
 
 Depuis la racine du projet :
