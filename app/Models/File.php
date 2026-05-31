@@ -28,7 +28,15 @@ class File extends Model
         'extraction_error',
         'ocr_status',
         'ocr_error',
+        'archived_at',
     ];
+
+    protected function casts(): array
+    {
+        return [
+            'archived_at' => 'datetime',
+        ];
+    }
 
     public function project(): BelongsTo
     {
@@ -66,6 +74,7 @@ class File extends Model
             'extraction_error' => $this->extraction_error,
             'ocr_status' => $this->ocr_status,
             'ocr_error' => $this->ocr_error,
+            'archived_at' => $this->archived_at?->toISOString(),
             'updated_at' => $this->updated_at?->toISOString(),
             'updated_at_timestamp' => $this->updated_at?->timestamp,
         ];

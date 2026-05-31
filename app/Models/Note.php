@@ -64,6 +64,7 @@ class Note extends Model
             'content' => $this->content,
             'note_type' => $this->type,
             'status' => $this->status,
+            'archived_at' => $this->archived_at?->toISOString(),
             'source_type' => $this->source_type,
             'source_detail' => $this->source_detail,
             'updated_at' => $this->updated_at?->toISOString(),

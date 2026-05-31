@@ -20,6 +20,7 @@ class Action extends Model
         'priority',
         'due_date',
         'completed_at',
+        'archived_at',
     ];
 
     protected function casts(): array
@@ -27,6 +28,7 @@ class Action extends Model
         return [
             'due_date' => 'date',
             'completed_at' => 'datetime',
+            'archived_at' => 'datetime',
         ];
     }
 
@@ -63,6 +65,7 @@ class Action extends Model
             'status' => $this->status,
             'priority' => $this->priority,
             'due_date' => $this->due_date?->toDateString(),
+            'archived_at' => $this->archived_at?->toISOString(),
             'updated_at' => $this->updated_at?->toISOString(),
             'updated_at_timestamp' => $this->updated_at?->timestamp,
         ];

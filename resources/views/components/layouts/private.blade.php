@@ -137,11 +137,13 @@
             color: var(--text);
         }
 
-        .button.primary {
+        .button.primary,
+        button.primary {
             background: var(--accent);
         }
 
-        .button.primary:hover {
+        .button.primary:hover,
+        button.primary:hover {
             background: var(--accent-dark);
         }
 
@@ -180,6 +182,10 @@
 
         .grid.three {
             grid-template-columns: repeat(3, minmax(0, 1fr));
+        }
+
+        .grid.four {
+            grid-template-columns: repeat(4, minmax(0, 1fr));
         }
 
         .panel {
@@ -259,6 +265,53 @@
         .row-actions form,
         .form-actions form {
             margin: 0;
+        }
+
+        .tight-actions {
+            justify-content: flex-start;
+            gap: 8px;
+        }
+
+        .inbox-item {
+            display: grid;
+            grid-template-columns: minmax(0, 1fr) minmax(340px, 0.9fr);
+            gap: 16px;
+            align-items: start;
+        }
+
+        .inbox-actions {
+            display: grid;
+            gap: 10px;
+        }
+
+        .inline-form {
+            display: grid;
+            grid-template-columns: minmax(0, 1fr) auto;
+            gap: 8px;
+            align-items: end;
+            margin: 0;
+        }
+
+        .item-excerpt {
+            margin-top: 8px;
+            color: var(--muted);
+            font-size: 0.92rem;
+        }
+
+        .compact-list .list-item {
+            padding: 8px 0;
+        }
+
+        .sr-only {
+            position: absolute;
+            width: 1px;
+            height: 1px;
+            padding: 0;
+            margin: -1px;
+            overflow: hidden;
+            clip: rect(0, 0, 0, 0);
+            white-space: nowrap;
+            border: 0;
         }
 
         .badge {
@@ -397,6 +450,17 @@
             color: var(--muted);
         }
 
+        @media (max-width: 980px) {
+            .grid.four,
+            .grid.three {
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+            }
+
+            .inbox-item {
+                grid-template-columns: 1fr;
+            }
+        }
+
         @media (max-width: 900px) {
             .app-shell {
                 display: block;
@@ -420,6 +484,7 @@
 
             .grid.two,
             .grid.three,
+            .grid.four,
             .form-grid,
             .filters-form,
             .search-form {
@@ -433,6 +498,10 @@
 
             .search-box {
                 display: grid;
+            }
+
+            .inline-form {
+                grid-template-columns: 1fr;
             }
         }
 
@@ -455,7 +524,9 @@
             }
 
             .button.primary,
-            .button.primary:hover {
+            .button.primary:hover,
+            button.primary,
+            button.primary:hover {
                 color: #042f2e;
             }
 

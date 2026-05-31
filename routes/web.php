@@ -6,6 +6,7 @@ use App\Http\Controllers\Admin\IndexingAdminController;
 use App\Http\Controllers\DecisionController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\FileController;
+use App\Http\Controllers\InboxController;
 use App\Http\Controllers\NoteController;
 use App\Http\Controllers\ProjectController;
 use App\Http\Controllers\QuickAddController;
@@ -35,7 +36,13 @@ Route::middleware('auth')->group(function (): void {
     Route::get('/files/{file}/download', [FileController::class, 'download'])->name('files.download');
     Route::post('/files/{file}/reindex', [FileController::class, 'reindex'])->name('files.reindex');
     Route::post('/files/{file}/ocr', [FileController::class, 'retryOcr'])->name('files.ocr');
-    Route::get('/inbox', [NoteController::class, 'inbox'])->name('inbox');
+    Route::get('/inbox', [InboxController::class, 'index'])->name('inbox');
+    Route::patch('/inbox/{type}/{id}/project', [InboxController::class, 'assignProject'])->name('inbox.assign-project');
+    Route::patch('/inbox/notes/{note}/type', [InboxController::class, 'updateNoteType'])->name('inbox.notes.type');
+    Route::post('/inbox/notes/{note}/convert-decision', [InboxController::class, 'convertNoteToDecision'])->name('inbox.notes.convert-decision');
+    Route::post('/inbox/notes/{note}/convert-action', [InboxController::class, 'convertNoteToAction'])->name('inbox.notes.convert-action');
+    Route::patch('/inbox/{type}/{id}/archive', [InboxController::class, 'archive'])->name('inbox.archive');
+    Route::delete('/inbox/{type}/{id}', [InboxController::class, 'destroy'])->name('inbox.destroy');
     Route::middleware('admin')->prefix('admin')->name('admin.')->group(function (): void {
         Route::get('/', [IndexingAdminController::class, 'index'])->name('index');
         Route::post('/indexing/files', [IndexingAdminController::class, 'reindexFiles'])->name('indexing.reindex-files');

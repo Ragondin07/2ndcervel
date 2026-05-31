@@ -22,6 +22,7 @@ class DecisionController extends Controller
         return view('decisions.index', [
             'decisions' => Decision::query()
                 ->with('project')
+                ->whereNull('archived_at')
                 ->when($projectId, fn ($query) => $query->where('project_id', $projectId))
                 ->when($status, fn ($query) => $query->where('status', $status))
                 ->latest('updated_at')

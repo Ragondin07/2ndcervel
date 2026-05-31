@@ -21,7 +21,15 @@ class Decision extends Model
         'risks',
         'impact',
         'status',
+        'archived_at',
     ];
+
+    protected function casts(): array
+    {
+        return [
+            'archived_at' => 'datetime',
+        ];
+    }
 
     public function project(): BelongsTo
     {
@@ -57,6 +65,7 @@ class Decision extends Model
             'risks' => $this->risks,
             'impact' => $this->impact,
             'status' => $this->status,
+            'archived_at' => $this->archived_at?->toISOString(),
             'updated_at' => $this->updated_at?->toISOString(),
             'updated_at_timestamp' => $this->updated_at?->timestamp,
         ];
