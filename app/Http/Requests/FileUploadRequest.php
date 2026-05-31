@@ -24,6 +24,7 @@ class FileUploadRequest extends FormRequest
             'description' => ['nullable', 'string'],
             'uploads' => ['required', 'array', 'min:1'],
             'uploads.*' => ['required', 'file', 'max:'.$this->maxUploadSizeKb()],
+            'return_to' => ['nullable', 'url'],
         ];
     }
 

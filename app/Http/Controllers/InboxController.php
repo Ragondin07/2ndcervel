@@ -8,6 +8,7 @@ use App\Models\File as StoredFile;
 use App\Models\Note;
 use App\Models\Project;
 use App\Support\MvpOptions;
+use App\Support\ProjectActivity;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -76,6 +77,18 @@ class InboxController extends Controller
 
         $item = $this->findInboxItem($type, $id);
         $item->update(['project_id' => $data['project_id']]);
+        $item->refresh();
+
+        ProjectActivity::logCreated($item, match ($type) {
+            'note' => 'note_created',
+            'decision' => 'decision_created',
+            'action' => 'action_created',
+            'file' => 'file_created',
+        }, $request->user()?->id);
+
+        if ($item instanceof Action && $item->status === 'faite') {
+            ProjectActivity::logActionCompleted($item, $request->user()?->id);
+        }
 
         Log::info('Inbox item assigned to project.', [
             'type' => $type,
@@ -122,6 +135,7 @@ class InboxController extends Controller
         });
 
         Log::info('Inbox note converted to decision.', ['note_id' => $note->id, 'decision_id' => $decision->id, 'user_id' => $request->user()?->id]);
+        ProjectActivity::logCreated($decision, 'decision_created', $request->user()?->id);
 
         return redirect()
             ->route('inbox')
@@ -149,6 +163,7 @@ class InboxController extends Controller
         });
 
         Log::info('Inbox note converted to action.', ['note_id' => $note->id, 'action_id' => $action->id, 'user_id' => $request->user()?->id]);
+        ProjectActivity::logCreated($action, 'action_created', $request->user()?->id);
 
         return redirect()
             ->route('inbox')

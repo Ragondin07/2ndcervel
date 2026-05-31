@@ -21,11 +21,13 @@ class Action extends Model
         'due_date',
         'completed_at',
         'archived_at',
+        'is_pinned',
     ];
 
     protected function casts(): array
     {
         return [
+            'is_pinned' => 'boolean',
             'due_date' => 'date',
             'completed_at' => 'datetime',
             'archived_at' => 'datetime',
@@ -56,6 +58,7 @@ class Action extends Model
     {
         return [
             'id' => $this->id,
+            'is_pinned' => $this->is_pinned,
             'type' => 'action',
             'project_id' => $this->project_id,
             'note_id' => $this->note_id,

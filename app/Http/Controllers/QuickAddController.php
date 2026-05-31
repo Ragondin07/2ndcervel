@@ -8,6 +8,7 @@ use App\Models\Decision;
 use App\Models\Note;
 use App\Models\Project;
 use App\Support\MvpOptions;
+use App\Support\ProjectActivity;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Log;
 use Illuminate\View\View;
@@ -50,6 +51,7 @@ class QuickAddController extends Controller
             'archived_at' => $data['status'] === 'archivee' ? now() : null,
         ]);
         Log::info('Quick note created.', ['note_id' => $note->id, 'project_id' => $note->project_id, 'user_id' => $request->user()?->id]);
+        ProjectActivity::logCreated($note, 'note_created', $request->user()?->id);
 
         return redirect()
             ->route('notes.show', $note)
@@ -67,6 +69,7 @@ class QuickAddController extends Controller
             'status' => $data['status'],
         ]);
         Log::info('Quick decision created.', ['decision_id' => $decision->id, 'project_id' => $decision->project_id, 'user_id' => $request->user()?->id]);
+        ProjectActivity::logCreated($decision, 'decision_created', $request->user()?->id);
 
         return redirect()
             ->route('decisions.show', $decision)
@@ -86,6 +89,11 @@ class QuickAddController extends Controller
             'completed_at' => $data['status'] === 'faite' ? now() : null,
         ]);
         Log::info('Quick action created.', ['action_id' => $action->id, 'project_id' => $action->project_id, 'user_id' => $request->user()?->id]);
+        ProjectActivity::logCreated($action, 'action_created', $request->user()?->id);
+
+        if ($action->status === 'faite') {
+            ProjectActivity::logActionCompleted($action, $request->user()?->id);
+        }
 
         return redirect()
             ->route('actions.show', $action)

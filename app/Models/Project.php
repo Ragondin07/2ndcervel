@@ -19,11 +19,13 @@ class Project extends Model
         'priority',
         'category',
         'archived_at',
+        'is_pinned',
     ];
 
     protected function casts(): array
     {
         return [
+            'is_pinned' => 'boolean',
             'archived_at' => 'datetime',
         ];
     }
@@ -57,6 +59,7 @@ class Project extends Model
     {
         return [
             'id' => $this->id,
+            'is_pinned' => $this->is_pinned,
             'type' => 'project',
             'project_id' => $this->id,
             'title' => $this->title,

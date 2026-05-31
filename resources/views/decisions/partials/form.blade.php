@@ -1,3 +1,4 @@
+<input type="hidden" name="return_to" value="{{ old('return_to', $returnTo ?? '') }}">
 <div class="form-grid">
     <div class="field">
         <label for="project_id">Projet</label>
@@ -92,5 +93,5 @@
 
 <div class="form-actions">
     <button class="primary" type="submit">{{ $submitLabel }}</button>
-    <a class="button secondary" href="{{ $decision->exists ? route('decisions.show', $decision) : route('decisions.index') }}">Annuler</a>
+    <a class="button secondary" href="{{ ($returnTo ?? null) ?: ($decision->exists ? route('decisions.show', $decision) : route('decisions.index')) }}">Annuler</a>
 </div>

@@ -3,6 +3,7 @@
         <div class="panel-inner">
             <form method="POST" action="{{ route('files.store') }}" enctype="multipart/form-data" class="stack-form">
                 @csrf
+                <input type="hidden" name="return_to" value="{{ old('return_to', $returnTo ?? '') }}">
 
                 <div class="form-grid">
                     <div class="field">
@@ -10,7 +11,7 @@
                         <select id="project_id" name="project_id">
                             <option value="">Aucun projet</option>
                             @foreach ($projects as $project)
-                                <option value="{{ $project->id }}" @selected((string) old('project_id') === (string) $project->id)>
+                                <option value="{{ $project->id }}" @selected((string) old('project_id', $selectedProjectId ?? null) === (string) $project->id)>
                                     {{ $project->title }}
                                 </option>
                             @endforeach
@@ -58,7 +59,7 @@
 
                 <div class="form-actions">
                     <button class="primary" type="submit">Uploader</button>
-                    <a class="button secondary" href="{{ route('files.index') }}">Annuler</a>
+                    <a class="button secondary" href="{{ ($returnTo ?? null) ?: route('files.index') }}">Annuler</a>
                 </div>
             </form>
         </div>

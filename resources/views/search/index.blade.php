@@ -74,7 +74,7 @@
                                         @endif
                                     </p>
                                     @if ($result['excerpt'])
-                                        <p class="empty">{{ $result['excerpt'] }}</p>
+                                        <p class="empty">{!! preg_replace('/('.preg_quote($filters['q'], '/').')/iu', '<mark>$1</mark>', e($result['excerpt'])) !!}</p>
                                     @endif
                                 </div>
                                 <a class="button secondary" href="{{ $result['url'] }}">Ouvrir</a>

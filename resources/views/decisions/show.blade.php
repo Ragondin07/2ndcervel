@@ -10,6 +10,11 @@
                 <p class="item-meta">Modifiee le {{ $decision->updated_at->format('d/m/Y H:i') }}</p>
             </div>
             <div class="row-actions">
+                <form method="POST" action="{{ route('pin.toggle', ['type' => 'decision', 'id' => $decision->id]) }}">
+                    @csrf
+                    @method('PATCH')
+                    <button class="secondary" type="submit">{{ $decision->is_pinned ? '★ Favori' : '☆ Favori' }}</button>
+                </form>
                 <a class="button secondary" href="{{ route('decisions.edit', $decision) }}">Modifier</a>
                 <form method="POST" action="{{ route('decisions.destroy', $decision) }}" onsubmit="return confirm('Supprimer cette decision ?');">
                     @csrf
