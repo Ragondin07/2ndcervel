@@ -4,20 +4,25 @@ services:
       context: .
       dockerfile: Dockerfile
     container_name: second-cervel-app
+    env_file:
+      - .env
     ports:
-      - "8000:8000"
+      - "${APP_PORT:-8000}:8000"
     environment:
-      APP_ENV: local
-      APP_DEBUG: "true"
-      DB_CONNECTION: pgsql
-      DB_HOST: postgres
-      DB_PORT: 5432
-      DB_DATABASE: second_cervel
-      DB_USERNAME: second_cervel
-      DB_PASSWORD: second_cervel
-      FILESYSTEM_DISK: local
-      MEILISEARCH_HOST: http://meilisearch:7700
-      MEILISEARCH_KEY: local_master_key
+      APP_ENV: ${APP_ENV:-local}
+      APP_DEBUG: ${APP_DEBUG:-true}
+      DB_CONNECTION: ${DB_CONNECTION:-pgsql}
+      DB_HOST: ${DB_HOST:-postgres}
+      DB_PORT: ${DB_PORT:-5432}
+      DB_DATABASE: ${DB_DATABASE:-second_cervel}
+      DB_USERNAME: ${DB_USERNAME:-second_cervel}
+      DB_PASSWORD: ${DB_PASSWORD:-second_cervel}
+      QUEUE_CONNECTION: ${QUEUE_CONNECTION:-database}
+      FILESYSTEM_DISK: ${FILESYSTEM_DISK:-local}
+      MEILISEARCH_HOST: ${MEILISEARCH_HOST:-http://meilisearch:7700}
+      MEILISEARCH_KEY: ${MEILISEARCH_KEY:-local_master_key}
+      TIKA_URL: ${TIKA_URL:-http://tika:9998}
+      SCOUT_DRIVER: ${SCOUT_DRIVER:-meilisearch}
     volumes:
       - ./:/var/www/html
       - app_vendor:/var/www/html/vendor
@@ -36,21 +41,23 @@ services:
       dockerfile: Dockerfile
     container_name: second-cervel-worker
     command: ["php", "artisan", "queue:work", "database", "--queue=indexing,default", "--sleep=2", "--tries=3"]
+    env_file:
+      - .env
     environment:
-      APP_ENV: local
-      APP_DEBUG: "true"
-      DB_CONNECTION: pgsql
-      DB_HOST: postgres
-      DB_PORT: 5432
-      DB_DATABASE: second_cervel
-      DB_USERNAME: second_cervel
-      DB_PASSWORD: second_cervel
-      QUEUE_CONNECTION: database
-      FILESYSTEM_DISK: local
-      MEILISEARCH_HOST: http://meilisearch:7700
-      MEILISEARCH_KEY: local_master_key
-      TIKA_URL: http://tika:9998
-      SCOUT_DRIVER: meilisearch
+      APP_ENV: ${APP_ENV:-local}
+      APP_DEBUG: ${APP_DEBUG:-true}
+      DB_CONNECTION: ${DB_CONNECTION:-pgsql}
+      DB_HOST: ${DB_HOST:-postgres}
+      DB_PORT: ${DB_PORT:-5432}
+      DB_DATABASE: ${DB_DATABASE:-second_cervel}
+      DB_USERNAME: ${DB_USERNAME:-second_cervel}
+      DB_PASSWORD: ${DB_PASSWORD:-second_cervel}
+      QUEUE_CONNECTION: ${QUEUE_CONNECTION:-database}
+      FILESYSTEM_DISK: ${FILESYSTEM_DISK:-local}
+      MEILISEARCH_HOST: ${MEILISEARCH_HOST:-http://meilisearch:7700}
+      MEILISEARCH_KEY: ${MEILISEARCH_KEY:-local_master_key}
+      TIKA_URL: ${TIKA_URL:-http://tika:9998}
+      SCOUT_DRIVER: ${SCOUT_DRIVER:-meilisearch}
     volumes:
       - ./:/var/www/html
       - app_vendor:/var/www/html/vendor
@@ -67,15 +74,15 @@ services:
     image: postgres:16-alpine
     container_name: second-cervel-postgres
     ports:
-      - "5432:5432"
+      - "127.0.0.1:${POSTGRES_HOST_PORT:-5432}:5432"
     environment:
-      POSTGRES_DB: second_cervel
-      POSTGRES_USER: second_cervel
-      POSTGRES_PASSWORD: second_cervel
+      POSTGRES_DB: ${DB_DATABASE:-second_cervel}
+      POSTGRES_USER: ${DB_USERNAME:-second_cervel}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-second_cervel}
     volumes:
       - postgres_data:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U second_cervel -d second_cervel"]
+      test: ["CMD-SHELL", "pg_isready -U \"$${POSTGRES_USER}\" -d \"$${POSTGRES_DB}\""]
       interval: 5s
       timeout: 5s
       retries: 10
@@ -84,10 +91,10 @@ services:
     image: getmeili/meilisearch:v1.13
     container_name: second-cervel-meilisearch
     ports:
-      - "7700:7700"
+      - "127.0.0.1:${MEILISEARCH_HOST_PORT:-7700}:7700"
     environment:
-      MEILI_ENV: development
-      MEILI_MASTER_KEY: local_master_key
+      MEILI_ENV: ${MEILI_ENV:-development}
+      MEILI_MASTER_KEY: ${MEILISEARCH_KEY:-local_master_key}
       MEILI_NO_ANALYTICS: "true"
     volumes:
       - meilisearch_data:/meili_data
@@ -96,7 +103,7 @@ services:
     image: apache/tika:2.9.2.1
     container_name: second-cervel-tika
     ports:
-      - "9998:9998"
+      - "127.0.0.1:${TIKA_HOST_PORT:-9998}:9998"
 
 volumes:
   postgres_data:

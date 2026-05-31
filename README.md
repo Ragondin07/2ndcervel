@@ -40,6 +40,38 @@ Puis lancer les services :
 docker compose up -d
 ```
 
+## Installation sur une VM Ubuntu 22.04
+
+La procedure complete pour deployer le site sur une VM Ubuntu Server 22.04 LTS vierge est documentee ici :
+
+```text
+docs/installation-ubuntu-22.04.md
+```
+
+Resume des commandes principales :
+
+```bash
+sudo apt update
+sudo apt upgrade -y
+sudo apt install -y curl git unzip ca-certificates gnupg lsb-release nano ufw
+git clone URL_DU_DEPOT_GIT /opt/memoire-projet
+cd /opt/memoire-projet
+cp .env.example .env
+nano .env
+docker compose pull
+docker compose build
+docker compose up -d
+docker compose exec app php artisan key:generate --force
+docker compose exec app php artisan migrate
+docker compose exec app php artisan db:seed
+docker compose exec app php artisan config:cache
+docker compose exec app php artisan route:cache
+docker compose exec app php artisan view:cache
+docker compose up -d worker
+```
+
+Pour une VM privee, privilegier un acces LAN/VPN et ne pas exposer PostgreSQL, Meilisearch, Tika ou de futurs services OCR publiquement.
+
 Au premier demarrage, le conteneur `app` :
 
 1. copie `.env.example` vers `.env` si necessaire ;
