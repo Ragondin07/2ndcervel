@@ -4,6 +4,7 @@ services:
       context: .
       dockerfile: Dockerfile
     container_name: second-cervel-app
+    restart: unless-stopped
     env_file:
       - .env
     ports:
@@ -25,7 +26,9 @@ services:
       context: .
       dockerfile: Dockerfile
     container_name: second-cervel-worker
-    command: ["php", "artisan", "queue:work", "database", "--queue=indexing,default", "--sleep=2", "--tries=3"]
+    restart: unless-stopped
+    stop_grace_period: 30s
+    command: ["php", "artisan", "queue:work", "database", "--queue=indexing,default", "--sleep=2", "--tries=3", "--timeout=90"]
     env_file:
       - .env
     volumes:
@@ -43,6 +46,7 @@ services:
   postgres:
     image: postgres:16-alpine
     container_name: second-cervel-postgres
+    restart: unless-stopped
     ports:
       - "127.0.0.1:${POSTGRES_HOST_PORT:-5432}:5432"
     environment:
@@ -60,6 +64,7 @@ services:
   meilisearch:
     image: getmeili/meilisearch:v1.13
     container_name: second-cervel-meilisearch
+    restart: unless-stopped
     ports:
       - "127.0.0.1:${MEILISEARCH_HOST_PORT:-7700}:7700"
     environment:
@@ -72,6 +77,7 @@ services:
   tika:
     image: apache/tika:2.9.2.1
     container_name: second-cervel-tika
+    restart: unless-stopped
     ports:
       - "127.0.0.1:${TIKA_HOST_PORT:-9998}:9998"
 

@@ -61,12 +61,12 @@ install_dependencies_if_missing() {
         return 0
     fi
 
-    if [ -f composer.lock ]; then
-        composer install --no-interaction --prefer-dist --no-progress
-    else
-        echo "WARNING: composer.lock is missing; installing from composer.json. Commit composer.lock as soon as dependencies can be resolved." >&2
-        composer install --no-interaction --prefer-dist --no-progress
+    if [ ! -f composer.lock ]; then
+        echo "ERROR: composer.lock is missing. Dependencies must be installed from the committed lock file." >&2
+        exit 1
     fi
+
+    composer install --no-interaction --prefer-dist --no-progress
 }
 
 prepare_laravel_directories() {

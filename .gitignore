@@ -11,3 +11,5 @@
 /.phpunit.cache
 /.idea
 /.vscode
+/backups/
+/.docker-build.sha256
