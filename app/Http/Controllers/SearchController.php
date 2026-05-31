@@ -207,7 +207,7 @@ class SearchController extends Controller
     {
         return File::query()
             ->with('project')
-            ->where(fn (Builder $query) => $this->likeAny($query, ['original_name', 'stored_name', 'description'], $filters['q']))
+            ->where(fn (Builder $query) => $this->likeAny($query, ['original_name', 'stored_name', 'description', 'extracted_text', 'ocr_text'], $filters['q']))
             ->when($filters['project_id'], fn (Builder $query) => $query->where('project_id', $filters['project_id']))
             ->when($filters['status'], fn (Builder $query) => $query->where('indexing_status', $filters['status']))
             ->latest('updated_at')
@@ -270,7 +270,7 @@ class SearchController extends Controller
             'title' => $file->original_name,
             'type' => 'fichier',
             'project' => $file->project?->title ?? 'Sans projet',
-            'excerpt' => $this->excerpt([$file->description, $file->path], $filters['q']),
+            'excerpt' => $this->excerpt([$file->description, $file->extracted_text, $file->ocr_text, $file->path], $filters['q']),
             'date' => $file->updated_at,
             'url' => route('files.show', $file),
         ];

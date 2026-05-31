@@ -24,7 +24,7 @@ return new class extends Migration
             $table->longText('ocr_text')->nullable();
             $table->string('indexing_status')->default('en_attente')->index();
             $table->string('extraction_status')->default('non_traite')->index();
-            $table->string('ocr_status')->default('non_traite')->index();
+            $table->string('ocr_status')->default('en_attente')->index();
             $table->timestamps();
 
             $table->index(['project_id', 'indexing_status']);

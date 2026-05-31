@@ -34,6 +34,7 @@ Route::middleware('auth')->group(function (): void {
     Route::resource('files', FileController::class)->only(['index', 'create', 'store', 'show', 'destroy']);
     Route::get('/files/{file}/download', [FileController::class, 'download'])->name('files.download');
     Route::post('/files/{file}/reindex', [FileController::class, 'reindex'])->name('files.reindex');
+    Route::post('/files/{file}/ocr', [FileController::class, 'retryOcr'])->name('files.ocr');
     Route::get('/inbox', [NoteController::class, 'inbox'])->name('inbox');
     Route::middleware('admin')->prefix('admin')->name('admin.')->group(function (): void {
         Route::get('/', [IndexingAdminController::class, 'index'])->name('index');

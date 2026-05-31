@@ -27,6 +27,7 @@ class File extends Model
         'extraction_status',
         'extraction_error',
         'ocr_status',
+        'ocr_error',
     ];
 
     public function project(): BelongsTo
@@ -64,6 +65,7 @@ class File extends Model
             'extraction_status' => $this->extraction_status,
             'extraction_error' => $this->extraction_error,
             'ocr_status' => $this->ocr_status,
+            'ocr_error' => $this->ocr_error,
             'updated_at' => $this->updated_at?->toISOString(),
             'updated_at_timestamp' => $this->updated_at?->timestamp,
         ];

@@ -3,10 +3,12 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\FileUploadRequest;
+use App\Jobs\ExtractOcrJob;
 use App\Jobs\IndexFileJob;
 use App\Models\File as StoredFile;
 use App\Models\Note;
 use App\Models\Project;
+use App\Services\OcrExtractor;
 use Illuminate\Database\Eloquent\Collection as EloquentCollection;
 use Illuminate\Database\QueryException;
 use Illuminate\Http\RedirectResponse;
@@ -77,7 +79,13 @@ class FileController extends Controller
             'user_id' => $request->user()?->id,
         ]);
 
-        $files->each(fn (StoredFile $file) => IndexFileJob::dispatch($file->id));
+        $files->each(function (StoredFile $file): void {
+            IndexFileJob::dispatch($file->id);
+
+            if (OcrExtractor::supportsExtension($file->extension)) {
+                ExtractOcrJob::dispatch($file->id);
+            }
+        });
 
         return redirect()
             ->route('files.index')
@@ -114,6 +122,33 @@ class FileController extends Controller
         return redirect()
             ->route('files.show', $file)
             ->with('status', 'Indexation relancee.');
+    }
+
+    public function retryOcr(StoredFile $file): RedirectResponse
+    {
+        if (! OcrExtractor::supportsExtension($file->extension)) {
+            $file->update([
+                'ocr_status' => 'non_supporte',
+                'ocr_error' => null,
+            ]);
+            $file->searchable();
+
+            return redirect()
+                ->route('files.show', $file)
+                ->with('status', 'OCR non supporte pour ce format.');
+        }
+
+        $file->update([
+            'ocr_status' => 'en_attente',
+            'ocr_error' => null,
+        ]);
+
+        ExtractOcrJob::dispatch($file->id);
+        Log::info('File OCR retry requested.', ['file_id' => $file->id, 'user_id' => request()->user()?->id]);
+
+        return redirect()
+            ->route('files.show', $file)
+            ->with('status', 'OCR relance en arriere-plan.');
     }
 
     public function destroy(StoredFile $file): RedirectResponse
@@ -160,7 +195,7 @@ class FileController extends Controller
             'description' => $data['description'] ?? null,
             'indexing_status' => 'en_attente',
             'extraction_status' => 'en_attente',
-            'ocr_status' => 'non_traite',
+            'ocr_status' => OcrExtractor::supportsExtension($extension) ? 'en_attente' : 'non_supporte',
         ]);
     }
 
@@ -200,5 +235,4 @@ class FileController extends Controller
     {
         return (int) config('filesystems.max_upload_size_mb', 50);
     }
-
 }

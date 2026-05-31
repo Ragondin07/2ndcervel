@@ -7,10 +7,15 @@ RUN apk add --no-cache \
         curl \
         git \
         icu-libs \
+        imagemagick \
         libpq \
         libzip \
         oniguruma \
+        poppler-utils \
         sqlite-libs \
+        tesseract-ocr \
+        tesseract-ocr-data-eng \
+        tesseract-ocr-data-fra \
         unzip \
         zip \
     && apk add --no-cache --virtual .build-deps \
