@@ -22,11 +22,13 @@ class Decision extends Model
         'impact',
         'status',
         'archived_at',
+        'is_pinned',
     ];
 
     protected function casts(): array
     {
         return [
+            'is_pinned' => 'boolean',
             'archived_at' => 'datetime',
         ];
     }
@@ -55,6 +57,7 @@ class Decision extends Model
     {
         return [
             'id' => $this->id,
+            'is_pinned' => $this->is_pinned,
             'type' => 'decision',
             'project_id' => $this->project_id,
             'source_note_id' => $this->source_note_id,

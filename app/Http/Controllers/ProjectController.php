@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Http\Requests\ProjectRequest;
 use App\Models\Project;
 use App\Support\MvpOptions;
+use App\Support\ProjectActivity;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
@@ -18,6 +19,7 @@ class ProjectController extends Controller
             'activeProjects' => Project::query()
                 ->whereNull('archived_at')
                 ->where('status', '!=', 'archive')
+                ->when(request()->boolean('pinned'), fn ($query) => $query->where('is_pinned', true))
                 ->latest('updated_at')
                 ->get(),
             'archivedProjects' => Project::query()
@@ -28,6 +30,7 @@ class ProjectController extends Controller
                 ->latest('updated_at')
                 ->get(),
             'statuses' => MvpOptions::PROJECT_STATUSES,
+            'pinnedOnly' => request()->boolean('pinned'),
         ]);
     }
 
@@ -51,6 +54,7 @@ class ProjectController extends Controller
 
         $project = Project::query()->create($data);
         Log::info('Project created.', ['project_id' => $project->id, 'user_id' => $request->user()?->id]);
+        ProjectActivity::logCreated($project, 'project_created', $request->user()?->id);
 
         return redirect()
             ->route('projects.show', $project)
@@ -66,10 +70,16 @@ class ProjectController extends Controller
             'files' => fn ($query) => $query->latest('updated_at'),
         ]);
 
+        $timelineFilter = request('timeline');
+        $timelineFilter = ProjectActivity::isValidFilter($timelineFilter) ? $timelineFilter : null;
+
         return view('projects.show', [
             'project' => $project,
             'statuses' => MvpOptions::PROJECT_STATUSES,
             'priorities' => MvpOptions::PRIORITIES,
+            'timeline' => ProjectActivity::timeline($project, $timelineFilter),
+            'timelineFilter' => $timelineFilter,
+            'timelineFilters' => ProjectActivity::filterOptions(),
         ]);
     }
 
@@ -98,7 +108,24 @@ class ProjectController extends Controller
             $data['archived_at'] = null;
         }
 
+        $oldStatus = $project->status;
+
         $project->update($data);
+
+        if ($oldStatus !== $project->status) {
+            ProjectActivity::log($project, 'project_status_changed', [
+                'old_status' => $oldStatus,
+                'new_status' => $project->status,
+            ], $request->user()?->id);
+        }
+
+        $changedFields = ProjectActivity::changedImportantFields($project);
+        if ($changedFields->isNotEmpty()) {
+            ProjectActivity::log($project, 'project_updated', [
+                'fields' => $changedFields->all(),
+            ], $request->user()?->id);
+        }
+
         Log::info('Project updated.', ['project_id' => $project->id, 'user_id' => $request->user()?->id]);
 
         return redirect()
@@ -108,10 +135,20 @@ class ProjectController extends Controller
 
     public function archive(Project $project): RedirectResponse
     {
+        $oldStatus = $project->status;
+
         $project->update([
             'status' => 'archive',
             'archived_at' => now(),
         ]);
+
+        if ($oldStatus !== 'archive') {
+            ProjectActivity::log($project, 'project_status_changed', [
+                'old_status' => $oldStatus,
+                'new_status' => 'archive',
+            ], request()->user()?->id);
+        }
+
         Log::info('Project archived.', ['project_id' => $project->id, 'user_id' => request()->user()?->id]);
 
         return redirect()

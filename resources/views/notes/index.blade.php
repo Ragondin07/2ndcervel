@@ -6,7 +6,7 @@
 
         <div class="section-header">
             <h2>Notes actives</h2>
-            <a class="button primary" href="{{ route('notes.create') }}">Nouvelle note</a>
+            <div class="row-actions"><a class="button secondary" href="{{ route('notes.index', ['pinned' => 1]) }}">Favoris</a><a class="button primary" href="{{ route('notes.create') }}">Nouvelle note</a></div>
         </div>
 
         <section class="panel">

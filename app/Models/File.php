@@ -29,11 +29,13 @@ class File extends Model
         'ocr_status',
         'ocr_error',
         'archived_at',
+        'is_pinned',
     ];
 
     protected function casts(): array
     {
         return [
+            'is_pinned' => 'boolean',
             'archived_at' => 'datetime',
         ];
     }
@@ -57,6 +59,7 @@ class File extends Model
     {
         return [
             'id' => $this->id,
+            'is_pinned' => $this->is_pinned,
             'type' => 'file',
             'project_id' => $this->project_id,
             'note_id' => $this->note_id,

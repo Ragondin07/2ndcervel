@@ -9,6 +9,7 @@ use App\Models\File as StoredFile;
 use App\Models\Note;
 use App\Models\Project;
 use App\Services\OcrExtractor;
+use App\Support\ProjectActivity;
 use Illuminate\Database\Eloquent\Collection as EloquentCollection;
 use Illuminate\Database\QueryException;
 use Illuminate\Http\RedirectResponse;
@@ -29,8 +30,10 @@ class FileController extends Controller
             'files' => StoredFile::query()
                 ->with(['project', 'note'])
                 ->whereNull('archived_at')
+                ->when(request()->boolean('pinned'), fn ($query) => $query->where('is_pinned', true))
                 ->latest('updated_at')
                 ->get(),
+            'projects' => $this->projects(),
         ]);
     }
 
@@ -39,6 +42,8 @@ class FileController extends Controller
         return view('files.create', [
             'projects' => $this->projects(),
             'notes' => $this->notes(),
+            'selectedProjectId' => request('project_id'),
+            'returnTo' => request('return_to', request('project_id') ? route('projects.show', request('project_id')) : route('files.index')),
             'maxUploadSizeMb' => $this->maxUploadSizeMb(),
         ]);
     }
@@ -47,6 +52,8 @@ class FileController extends Controller
     {
         $storedPaths = [];
         $data = $this->normalizedData($request->validated());
+        $returnTo = $data['return_to'] ?? null;
+        unset($data['return_to']);
 
         try {
             $files = DB::transaction(function () use ($request, $data, &$storedPaths): EloquentCollection {
@@ -80,6 +87,8 @@ class FileController extends Controller
             'user_id' => $request->user()?->id,
         ]);
 
+        $files->each(fn (StoredFile $file) => ProjectActivity::logCreated($file, 'file_created', $request->user()?->id));
+
         $files->each(function (StoredFile $file): void {
             IndexFileJob::dispatch($file->id);
 
@@ -89,7 +98,7 @@ class FileController extends Controller
         });
 
         return redirect()
-            ->route('files.index')
+            ->to($returnTo ?: route('files.index'))
             ->with('status', $files->count() > 1 ? "{$files->count()} fichiers ajoutes." : 'Fichier ajoute.');
     }
 
@@ -99,6 +108,7 @@ class FileController extends Controller
 
         return view('files.show', [
             'file' => $file,
+            'projects' => $this->projects(),
         ]);
     }
 
@@ -107,6 +117,57 @@ class FileController extends Controller
         abort_unless(Storage::disk('uploads')->exists($file->path), 404);
 
         return Storage::disk('uploads')->download($file->path, $file->original_name);
+    }
+
+
+    public function updateProject(StoredFile $file): RedirectResponse
+    {
+        $data = request()->validate([
+            'project_id' => ['nullable', 'integer', 'exists:projects,id'],
+        ], [
+            'project_id.exists' => 'Le projet selectionne n existe pas.',
+        ]);
+
+        $file->update(['project_id' => $data['project_id'] ?? null]);
+        $file->load('project');
+        ProjectActivity::logCreated($file, 'file_created', request()->user()?->id);
+
+        Log::info('File project changed.', [
+            'file_id' => $file->id,
+            'project_id' => $file->project_id,
+            'user_id' => request()->user()?->id,
+        ]);
+
+        return back()->with('status', $file->project_id ? 'Fichier deplace vers le projet.' : 'Fichier retire du projet.');
+    }
+
+    public function bulkUpdateProject(): RedirectResponse
+    {
+        $data = request()->validate([
+            'file_ids' => ['required', 'array', 'min:1'],
+            'file_ids.*' => ['integer', 'exists:files,id'],
+            'project_id' => ['nullable', 'integer', 'exists:projects,id'],
+        ], [
+            'file_ids.required' => 'Selectionnez au moins un fichier.',
+            'project_id.exists' => 'Le projet selectionne n existe pas.',
+        ]);
+
+        $files = StoredFile::query()->whereIn('id', $data['file_ids'])->get();
+        $projectId = $data['project_id'] ?? null;
+
+        foreach ($files as $file) {
+            $file->update(['project_id' => $projectId]);
+            $file->load('project');
+            ProjectActivity::logCreated($file, 'file_created', request()->user()?->id);
+        }
+
+        Log::info('Files bulk project changed.', [
+            'file_ids' => $files->pluck('id')->all(),
+            'project_id' => $projectId,
+            'user_id' => request()->user()?->id,
+        ]);
+
+        return back()->with('status', $files->count().' fichier(s) deplace(s).');
     }
 
     public function reindex(StoredFile $file): RedirectResponse
@@ -127,29 +188,73 @@ class FileController extends Controller
 
     public function retryOcr(StoredFile $file): RedirectResponse
     {
-        if (! OcrExtractor::supportsExtension($file->extension)) {
+        try {
+            if (! OcrExtractor::supportsExtension($file->extension)) {
+                $file->update([
+                    'ocr_status' => 'non_supporte',
+                    'ocr_error' => null,
+                ]);
+                $file->searchable();
+
+                Log::info('File OCR retry skipped unsupported file.', [
+                    'file_id' => $file->id,
+                    'extension' => $file->extension,
+                    'user_id' => request()->user()?->id,
+                ]);
+
+                return redirect()
+                    ->route('files.show', $file)
+                    ->with('status', 'OCR non supporte pour ce format de fichier.');
+            }
+
+            if (! Storage::disk('uploads')->exists($file->path)) {
+                $file->update([
+                    'ocr_status' => 'erreur',
+                    'ocr_error' => 'Fichier original introuvable sur le stockage uploads.',
+                ]);
+
+                Log::warning('File OCR retry failed missing upload.', [
+                    'file_id' => $file->id,
+                    'path' => $file->path,
+                    'user_id' => request()->user()?->id,
+                ]);
+
+                return redirect()
+                    ->route('files.show', $file)
+                    ->with('status', 'OCR impossible : fichier original introuvable. Verifiez les uploads et permissions.');
+            }
+
             $file->update([
-                'ocr_status' => 'non_supporte',
+                'ocr_status' => 'en_attente',
                 'ocr_error' => null,
             ]);
-            $file->searchable();
+
+            ExtractOcrJob::dispatch($file->id);
+            Log::info('File OCR retry requested.', [
+                'file_id' => $file->id,
+                'queue' => 'indexing',
+                'user_id' => request()->user()?->id,
+            ]);
 
             return redirect()
                 ->route('files.show', $file)
-                ->with('status', 'OCR non supporte pour ce format.');
+                ->with('status', 'OCR relance en arriere-plan. Statut : en attente.');
+        } catch (Throwable $exception) {
+            $file->update([
+                'ocr_status' => 'erreur',
+                'ocr_error' => $exception->getMessage(),
+            ]);
+
+            Log::error('File OCR retry could not be queued.', [
+                'file_id' => $file->id,
+                'user_id' => request()->user()?->id,
+                'error' => $exception->getMessage(),
+            ]);
+
+            return redirect()
+                ->route('files.show', $file)
+                ->with('status', 'OCR non relance : une erreur a ete journalisee. Verifiez la file et les permissions.');
         }
-
-        $file->update([
-            'ocr_status' => 'en_attente',
-            'ocr_error' => null,
-        ]);
-
-        ExtractOcrJob::dispatch($file->id);
-        Log::info('File OCR retry requested.', ['file_id' => $file->id, 'user_id' => request()->user()?->id]);
-
-        return redirect()
-            ->route('files.show', $file)
-            ->with('status', 'OCR relance en arriere-plan.');
     }
 
     public function destroy(StoredFile $file): RedirectResponse
@@ -169,7 +274,7 @@ class FileController extends Controller
         Log::warning('File deleted.', ['file_id' => $fileId, 'user_id' => request()->user()?->id]);
 
         return redirect()
-            ->route('files.index')
+            ->to($returnTo ?: route('files.index'))
             ->with('status', 'Fichier supprime.');
     }
 

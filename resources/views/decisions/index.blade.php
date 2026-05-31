@@ -6,7 +6,7 @@
 
         <div class="section-header">
             <h2>Toutes les decisions</h2>
-            <a class="button primary" href="{{ route('decisions.create') }}">Nouvelle decision</a>
+            <div class="row-actions"><a class="button secondary" href="{{ route('decisions.index', ['pinned' => 1]) }}">Favoris</a><a class="button primary" href="{{ route('decisions.create') }}">Nouvelle decision</a></div>
         </div>
 
         <section class="panel">

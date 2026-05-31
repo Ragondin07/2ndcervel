@@ -1,11 +1,18 @@
 @php
     $titleField = $titleField ?? 'title';
     $routeName = $routeName ?? null;
+    $actionUrl = $actionUrl ?? null;
+    $actionLabel = $actionLabel ?? '+';
 @endphp
 
-<div class="panel">
+<div class="panel card-accent">
     <div class="panel-inner">
-        <h2 class="panel-title">{{ $title }}</h2>
+        <div class="mini-header">
+            <h2 class="panel-title">{{ $title }} <span class="badge badge-info">{{ $items->count() }}</span></h2>
+            @if ($actionUrl)
+                <a class="quick-add-button" href="{{ $actionUrl }}" aria-label="Ajouter {{ $title }}">{{ $actionLabel }}</a>
+            @endif
+        </div>
         @if ($items->isEmpty())
             <p class="empty">{{ $empty }}</p>
         @else

@@ -10,6 +10,11 @@
                 <p class="item-meta">Ajoute le {{ $file->created_at->format('d/m/Y H:i') }}</p>
             </div>
             <div class="row-actions">
+                <form method="POST" action="{{ route('pin.toggle', ['type' => 'file', 'id' => $file->id]) }}">
+                    @csrf
+                    @method('PATCH')
+                    <button class="secondary" type="submit">{{ $file->is_pinned ? '★ Favori' : '☆ Favori' }}</button>
+                </form>
                 <a class="button primary" href="{{ route('files.download', $file) }}">Telecharger</a>
                 <form method="POST" action="{{ route('files.reindex', $file) }}">
                     @csrf
@@ -38,6 +43,22 @@
                             Sans projet
                         @endif
                     </p>
+                    <form class="stack-form" method="POST" action="{{ route('files.project', $file) }}">
+                        @csrf
+                        @method('PATCH')
+                        <div class="field">
+                            <label for="project_id">Changer de projet</label>
+                            <select id="project_id" name="project_id">
+                                <option value="">Retirer du projet / Inbox</option>
+                                @foreach ($projects as $project)
+                                    <option value="{{ $project->id }}" @selected($file->project_id === $project->id)>{{ $project->title }}</option>
+                                @endforeach
+                            </select>
+                        </div>
+                        <div class="form-actions">
+                            <button type="submit">Changer de projet</button>
+                        </div>
+                    </form>
                 </div>
             </div>
             <div class="panel">

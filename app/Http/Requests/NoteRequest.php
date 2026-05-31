@@ -23,6 +23,7 @@ class NoteRequest extends FormRequest
             'status' => ['required', Rule::in(array_keys(MvpOptions::NOTE_STATUSES))],
             'source_type' => ['nullable', 'string', 'max:255'],
             'source_detail' => ['nullable', 'string'],
+            'return_to' => ['nullable', 'url'],
         ];
     }
 

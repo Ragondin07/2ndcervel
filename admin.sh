@@ -56,7 +56,7 @@ MENU
 
 pending_ocr() {
     require_docker
-    artisan tinker --execute='echo App\Models\File::query()->whereIn("ocr_status", ["pending", "failed"])->count().PHP_EOL;' || true
+    artisan tinker --execute='echo App\Models\File::query()->whereIn("ocr_status", ["en_attente", "en_cours", "erreur"])->count().PHP_EOL;' || true
 }
 
 restart_services() {
@@ -93,7 +93,7 @@ menu() {
 4. Sauvegarde
 5. Restauration
 6. Réindexation Meilisearch
-7. Traitements OCR en attente
+7. Traitements OCR en attente/erreur
 8. Vérification permissions
 9. Redémarrage services
 10. Diagnostic complet

@@ -7,6 +7,7 @@ use App\Models\Decision;
 use App\Models\Note;
 use App\Models\Project;
 use App\Support\MvpOptions;
+use App\Support\ProjectActivity;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
@@ -25,6 +26,7 @@ class DecisionController extends Controller
                 ->whereNull('archived_at')
                 ->when($projectId, fn ($query) => $query->where('project_id', $projectId))
                 ->when($status, fn ($query) => $query->where('status', $status))
+                ->when(request()->boolean('pinned'), fn ($query) => $query->where('is_pinned', true))
                 ->latest('updated_at')
                 ->get(),
             'projects' => $this->projects(),
@@ -32,6 +34,7 @@ class DecisionController extends Controller
             'filters' => [
                 'project_id' => $projectId,
                 'status' => $status,
+                'pinned' => request()->boolean('pinned'),
             ],
         ]);
     }
@@ -40,21 +43,29 @@ class DecisionController extends Controller
     {
         return view('decisions.create', [
             'decision' => new Decision([
+                'project_id' => request('project_id'),
+                'title' => request('title', ''),
                 'status' => 'proposee',
             ]),
             'projects' => $this->projects(),
             'notes' => $this->notes(),
             'statuses' => MvpOptions::DECISION_STATUSES,
+            'returnTo' => request('return_to', request('project_id') ? route('projects.show', request('project_id')) : route('decisions.index')),
         ]);
     }
 
     public function store(DecisionRequest $request): RedirectResponse
     {
-        $decision = Decision::query()->create($this->normalizedData($request->validated()));
+        $data = $request->validated();
+        $returnTo = $data['return_to'] ?? null;
+        unset($data['return_to']);
+
+        $decision = Decision::query()->create($this->normalizedData($data));
         Log::info('Decision created.', ['decision_id' => $decision->id, 'project_id' => $decision->project_id, 'user_id' => $request->user()?->id]);
+        ProjectActivity::logCreated($decision, 'decision_created', $request->user()?->id);
 
         return redirect()
-            ->route('decisions.show', $decision)
+            ->to($returnTo ?: route('decisions.show', $decision))
             ->with('status', 'Decision creee.');
     }
 
@@ -80,11 +91,22 @@ class DecisionController extends Controller
 
     public function update(DecisionRequest $request, Decision $decision): RedirectResponse
     {
-        $decision->update($this->normalizedData($request->validated()));
+        $data = $request->validated();
+        $returnTo = $data['return_to'] ?? null;
+        unset($data['return_to']);
+        $oldProjectId = $decision->project_id;
+
+        $decision->update($this->normalizedData($data));
+
+        if ($oldProjectId !== $decision->project_id && $decision->project_id !== null) {
+            $decision->load('project');
+            ProjectActivity::logCreated($decision, 'decision_created', $request->user()?->id);
+        }
+
         Log::info('Decision updated.', ['decision_id' => $decision->id, 'project_id' => $decision->project_id, 'user_id' => $request->user()?->id]);
 
         return redirect()
-            ->route('decisions.show', $decision)
+            ->to($returnTo ?: route('decisions.show', $decision))
             ->with('status', 'Decision modifiee.');
     }
 

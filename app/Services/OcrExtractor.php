@@ -37,10 +37,14 @@ class OcrExtractor
         $disk = Storage::disk('uploads');
 
         if (! $disk->exists($file->path)) {
-            throw new RuntimeException('Le fichier original est introuvable sur le stockage.');
+            throw new RuntimeException('Le fichier original est introuvable sur le stockage uploads.');
         }
 
         $absolutePath = $disk->path($file->path);
+
+        if (! is_readable($absolutePath)) {
+            throw new RuntimeException('Le fichier original existe mais n est pas lisible par le worker. Verifiez les permissions uploads.');
+        }
         $extension = strtolower((string) $file->extension);
 
         $text = $extension === 'pdf'
@@ -147,7 +151,11 @@ class OcrExtractor
         $directory = storage_path('framework/cache/ocr/'.Str::uuid());
 
         if (! mkdir($directory, 0775, true) && ! is_dir($directory)) {
-            throw new RuntimeException('Impossible de preparer le dossier temporaire OCR.');
+            throw new RuntimeException('Impossible de preparer le dossier temporaire OCR. Verifiez storage/framework/cache.');
+        }
+
+        if (! is_writable($directory)) {
+            throw new RuntimeException('Le dossier temporaire OCR n est pas accessible en ecriture. Verifiez les permissions storage.');
         }
 
         try {

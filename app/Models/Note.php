@@ -20,11 +20,13 @@ class Note extends Model
         'source_type',
         'source_detail',
         'archived_at',
+        'is_pinned',
     ];
 
     protected function casts(): array
     {
         return [
+            'is_pinned' => 'boolean',
             'archived_at' => 'datetime',
         ];
     }
@@ -58,6 +60,7 @@ class Note extends Model
     {
         return [
             'id' => $this->id,
+            'is_pinned' => $this->is_pinned,
             'type' => 'note',
             'project_id' => $this->project_id,
             'title' => $this->title,

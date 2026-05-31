@@ -6,7 +6,7 @@
 
         <div class="section-header">
             <h2>Projets actifs</h2>
-            <a class="button primary" href="{{ route('projects.create') }}">Nouveau projet</a>
+            <div class="row-actions"><a class="button secondary" href="{{ route('projects.index', ['pinned' => 1]) }}">Favoris</a><a class="button primary" href="{{ route('projects.create') }}">Nouveau projet</a></div>
         </div>
 
         <section class="panel">

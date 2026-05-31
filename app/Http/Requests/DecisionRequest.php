@@ -27,6 +27,7 @@ class DecisionRequest extends FormRequest
             'risks' => ['nullable', 'string'],
             'impact' => ['nullable', 'string'],
             'status' => ['required', Rule::in(array_keys(MvpOptions::DECISION_STATUSES))],
+            'return_to' => ['nullable', 'url'],
         ];
     }
 

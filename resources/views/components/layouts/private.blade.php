@@ -21,6 +21,10 @@
             --accent: #0f766e;
             --accent-dark: #115e59;
             --danger: #b42318;
+            --info: #2563eb;
+            --success: #15803d;
+            --warning: #d97706;
+            --card-shadow: 0 10px 24px rgba(15, 23, 42, 0.08);
         }
 
         * {
@@ -190,8 +194,17 @@
 
         .panel {
             border: 1px solid var(--border);
-            border-radius: 8px;
+            border-radius: 12px;
             background: var(--surface);
+            box-shadow: var(--card-shadow);
+        }
+
+        .card-accent {
+            border-left: 4px solid var(--accent);
+        }
+
+        .metric-card {
+            border-top: 4px solid var(--info);
         }
 
         .notice {
@@ -365,6 +378,8 @@
         textarea,
         select,
         input[type="text"],
+        input[type="search"],
+        input[type="date"],
         .file-input {
             width: 100%;
             min-height: 44px;
@@ -391,6 +406,229 @@
             border-top: 1px solid var(--border);
             color: var(--muted);
             white-space: pre-wrap;
+        }
+
+
+        .mini-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            margin-bottom: 12px;
+        }
+
+        .quick-add-button {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 36px;
+            height: 36px;
+            border-radius: 999px;
+            background: var(--accent);
+            color: #ffffff;
+            font-size: 1.35rem;
+            font-weight: 900;
+        }
+
+        .badge-info {
+            background: #dbeafe;
+            color: #1d4ed8;
+        }
+
+        .badge-success {
+            background: #dcfce7;
+            color: #166534;
+        }
+
+        .badge-warning {
+            background: #ffedd5;
+            color: #9a3412;
+        }
+
+        .badge-danger {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+
+        .progress {
+            height: 12px;
+            overflow: hidden;
+            border-radius: 999px;
+            background: var(--surface-soft);
+        }
+
+        .progress span {
+            display: block;
+            height: 100%;
+            border-radius: inherit;
+            background: linear-gradient(90deg, var(--accent), var(--success));
+        }
+
+        .checkbox-line {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .compact-project-form {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .compact-project-form select {
+            max-width: 220px;
+        }
+
+
+
+
+        .shortcut-help {
+            position: fixed;
+            right: 20px;
+            bottom: 20px;
+            z-index: 50;
+            width: min(320px, calc(100vw - 32px));
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            background: var(--surface);
+            box-shadow: var(--card-shadow);
+        }
+
+        .kanban-board {
+            display: grid;
+            grid-template-columns: repeat(4, minmax(220px, 1fr));
+            gap: 14px;
+            align-items: start;
+            overflow-x: auto;
+            padding-bottom: 8px;
+        }
+
+        .kanban-column {
+            min-width: 220px;
+            background: var(--surface-soft);
+        }
+
+        .kanban-card {
+            display: grid;
+            gap: 6px;
+            padding: 12px;
+            margin-top: 10px;
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            background: var(--surface);
+        }
+
+        .context-layout {
+            display: grid;
+            grid-template-columns: minmax(0, 1fr) 320px;
+            gap: 18px;
+            align-items: start;
+        }
+
+        .context-panel {
+            position: sticky;
+            top: 88px;
+        }
+
+        .context-panel h3 {
+            margin: 18px 0 6px;
+            font-size: 0.92rem;
+            color: var(--muted);
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+        }
+
+        .timeline-list {
+            position: relative;
+            display: grid;
+            gap: 0;
+            margin: 0;
+            padding: 0;
+            list-style: none;
+        }
+
+        .timeline-item {
+            position: relative;
+            display: grid;
+            grid-template-columns: 120px minmax(0, 1fr);
+            gap: 18px;
+            padding: 0 0 18px;
+        }
+
+        .timeline-item::before {
+            content: "";
+            position: absolute;
+            top: 26px;
+            bottom: 0;
+            left: 130px;
+            width: 2px;
+            background: var(--border);
+        }
+
+        .timeline-item:last-child {
+            padding-bottom: 0;
+        }
+
+        .timeline-item:last-child::before {
+            display: none;
+        }
+
+        .timeline-date {
+            color: var(--muted);
+            font-size: 0.85rem;
+            font-weight: 700;
+        }
+
+        .timeline-content {
+            position: relative;
+            padding: 12px 14px;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            background: var(--bg);
+        }
+
+        .timeline-content::before {
+            content: "";
+            position: absolute;
+            top: 18px;
+            left: -25px;
+            width: 12px;
+            height: 12px;
+            border: 3px solid var(--accent);
+            border-radius: 999px;
+            background: var(--surface);
+        }
+
+        .timeline-title {
+            margin: 6px 0 0;
+            font-weight: 800;
+        }
+
+        .timeline-description {
+            margin: 6px 0 0;
+            color: var(--muted);
+            font-size: 0.92rem;
+        }
+
+        .timeline-filters {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-top: 12px;
+        }
+
+        .timeline-filters .badge {
+            border: 1px solid var(--border);
+        }
+
+        .timeline-filters .active {
+            background: var(--accent);
+            color: #ffffff;
+        }
+
+        .pagination {
+            margin-top: 18px;
         }
 
         .meta-list {
@@ -451,6 +689,19 @@
         }
 
         @media (max-width: 980px) {
+            .kanban-board {
+                grid-template-columns: 1fr;
+                overflow-x: visible;
+            }
+
+            .context-layout {
+                grid-template-columns: 1fr;
+            }
+
+            .context-panel {
+                position: static;
+            }
+
             .grid.four,
             .grid.three {
                 grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -491,9 +742,34 @@
                 grid-template-columns: 1fr;
             }
 
+            .timeline-item {
+                grid-template-columns: 1fr;
+                gap: 8px;
+            }
+
+            .timeline-item::before,
+            .timeline-content::before {
+                display: none;
+            }
+
             .project-row {
                 align-items: flex-start;
                 flex-direction: column;
+            }
+
+            .row-actions,
+            .row-actions .button,
+            .row-actions button,
+            .compact-project-form {
+                width: 100%;
+            }
+
+            .compact-project-form {
+                display: grid;
+            }
+
+            .compact-project-form select {
+                max-width: none;
             }
 
             .search-box {
@@ -534,6 +810,10 @@
                 border-color: #0f766e;
                 background: #134e4a;
                 color: #ccfbf1;
+            }
+
+            .badge-info, .badge-success, .badge-warning, .badge-danger {
+                color: #0f172a;
             }
         }
     </style>
@@ -586,5 +866,44 @@
             </main>
         </div>
     </div>
+
+    <div id="shortcut-help" class="shortcut-help" hidden>
+        <div class="panel-inner">
+            <h2>Raccourcis clavier</h2>
+            <p><strong>N</strong> : nouvelle note rapide</p>
+            <p><strong>P</strong> : nouveau projet</p>
+            <p><strong>A</strong> : nouvelle action</p>
+            <p><strong>R</strong> : recherche</p>
+            <p><strong>?</strong> : afficher/masquer cette aide</p>
+        </div>
+    </div>
+    <script>
+        const shortcutRoutes = {
+            n: @json(route('notes.create')),
+            p: @json(route('projects.create')),
+            a: @json(route('actions.create')),
+            r: @json(route('search')),
+        };
+
+        document.addEventListener('keydown', (event) => {
+            const target = event.target;
+            const isTyping = ['INPUT', 'TEXTAREA', 'SELECT'].includes(target?.tagName) || target?.isContentEditable;
+            if (isTyping || event.ctrlKey || event.metaKey || event.altKey) {
+                return;
+            }
+
+            if (event.key === '?') {
+                const help = document.getElementById('shortcut-help');
+                help.hidden = !help.hidden;
+                return;
+            }
+
+            const route = shortcutRoutes[event.key.toLowerCase()];
+            if (route) {
+                window.location.href = route;
+            }
+        });
+    </script>
+
 </body>
 </html>

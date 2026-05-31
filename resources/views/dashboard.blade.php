@@ -12,6 +12,58 @@
             <a class="button primary" href="{{ route('quick-add') }}">Ajouter rapidement</a>
         </div>
 
+
+
+        <section class="grid four">
+            <div class="panel metric-card"><div class="panel-inner"><p class="item-meta">Actions en retard</p><p class="metric">{{ $overdueActions->count() }}</p></div></div>
+            <div class="panel metric-card"><div class="panel-inner"><p class="item-meta">OCR en erreur</p><p class="metric">{{ $ocrErrors->count() }}</p></div></div>
+            <div class="panel metric-card"><div class="panel-inner"><p class="item-meta">Fichiers non classés</p><p class="metric">{{ $unclassifiedFilesCount }}</p></div></div>
+            <div class="panel metric-card"><div class="panel-inner"><p class="item-meta">Inbox à traiter</p><p class="metric">{{ $inboxItemsCount }}</p></div></div>
+        </section>
+
+        <section class="grid two">
+            <div class="panel card-accent">
+                <div class="panel-inner">
+                    <h2 class="panel-title">★ Éléments épinglés</h2>
+                    @php
+                        $pinned = collect()
+                            ->merge($pinnedProjects->map(fn ($item) => ['label' => 'Projet', 'title' => $item->title, 'url' => route('projects.show', $item)]))
+                            ->merge($pinnedNotes->map(fn ($item) => ['label' => 'Note', 'title' => $item->title, 'url' => route('notes.show', $item)]))
+                            ->merge($pinnedDecisions->map(fn ($item) => ['label' => 'Décision', 'title' => $item->title, 'url' => route('decisions.show', $item)]))
+                            ->merge($pinnedActions->map(fn ($item) => ['label' => 'Action', 'title' => $item->title, 'url' => route('actions.show', $item)]))
+                            ->merge($pinnedFiles->map(fn ($item) => ['label' => 'Fichier', 'title' => $item->original_name, 'url' => route('files.show', $item)]));
+                    @endphp
+                    @if ($pinned->isEmpty())
+                        <p class="empty">Aucun favori pour le moment.</p>
+                    @else
+                        <ul class="list compact-list">
+                            @foreach ($pinned->take(10) as $item)
+                                <li class="list-item"><span class="badge badge-info">{{ $item['label'] }}</span> <a class="item-title" href="{{ $item['url'] }}">{{ $item['title'] }}</a></li>
+                            @endforeach
+                        </ul>
+                    @endif
+                </div>
+            </div>
+
+            <div class="panel card-accent">
+                <div class="panel-inner">
+                    <h2 class="panel-title">Ma journée</h2>
+                    @if ($overdueActions->isEmpty() && $ocrErrors->isEmpty())
+                        <p class="empty">Aucun blocage immédiat identifié.</p>
+                    @else
+                        <ul class="list compact-list">
+                            @foreach ($overdueActions as $action)
+                                <li class="list-item"><span class="badge badge-danger">Retard</span> <a href="{{ route('actions.show', $action) }}">{{ $action->title }}</a></li>
+                            @endforeach
+                            @foreach ($ocrErrors as $file)
+                                <li class="list-item"><span class="badge badge-danger">OCR</span> <a href="{{ route('files.show', $file) }}">{{ $file->original_name }}</a></li>
+                            @endforeach
+                        </ul>
+                    @endif
+                </div>
+            </div>
+        </section>
+
         <section class="grid two">
             <div class="panel">
                 <div class="panel-inner">
